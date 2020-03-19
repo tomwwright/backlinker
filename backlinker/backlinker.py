@@ -35,7 +35,7 @@ class Note(object):
     if start_of_backlinking_block != -1:
       content = content[:start_of_backlinking_block]
 
-    content = content.split('---')
+    content = content.split('---', 2)
 
     self.content_lines = content[2].strip().split('\n')
     self.frontmatter = yaml.load(content[1])
@@ -149,8 +149,9 @@ def render_note_other_titles(note):
 
 def render_note_backlinks(note, link, other_title_links):
   rendered = """
----
 <!-- begin backlinker content -->
+
+---
 """
 
   if link:
