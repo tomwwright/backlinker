@@ -19,10 +19,14 @@ def parse_arguments():
   parser.add_argument('--input', type=dir_path_arg_type)
   parser.add_argument('--output', type=dir_path_arg_type)
 
+  parser.add_argument('--rewrite-as-links', dest='rewrite_as_links', action='store_true')
+  parser.add_argument('--no-rewrite-as-links', dest='rewrite_as_links', action='store_false')
+  parser.set_defaults(rewrite_as_links=False)
+
   return parser.parse_args()
 
 
 def cli():
   args = parse_arguments()
 
-  run_backlinker(args.input, args.output)
+  run_backlinker(args.input, args.output, args.rewrite_as_links)

@@ -7,6 +7,7 @@ import sys
 import os
 import glob
 import re
+import urllib.parse
 
 
 class Link(object):
@@ -16,12 +17,26 @@ class Link(object):
     self.sources = []
     self.destination = None
 
-  def rewrite_in_notes(self):
+  def as_soft_link(self):
     is_alternate_title = self.title != self.destination.title
+    return f"[[{self.title}|{self.destination.title}]]" if is_alternate_title else f"[[{self.title}]]"
+
+  def as_link(self):
+    return f"[{self.title}]({urllib.parse.quote(os.path.basename(self.destination.path))})"
+
+  def as_regex(self):
+    return re.compile(f'\\[\\[{re.escape(self.title)}(\\|.*?)?\\]\\]')
+
+  def update_aliases_in_notes(self):
     for source in self.sources:
-      pattern = re.compile(f'\\[\\[{re.escape(self.title)}(\\|.*?)?\\]\\]')
-      new_link_text = f"[[{self.title}|{self.destination.title}]]" if is_alternate_title else f"[[{self.title}]]"
-      (updated_content, _) = pattern.subn(new_link_text, source.content)
+      pattern = self.as_regex()
+      (updated_content, _) = pattern.subn(self.as_soft_link(), source.content)
+      source.content = updated_content
+
+  def rewrite_in_notes(self):
+    for source in self.sources:
+      pattern = self.as_regex()
+      (updated_content, _) = pattern.subn(self.as_link(), source.content)
       source.content = updated_content
 
 
@@ -34,8 +49,8 @@ class Note(object):
     self.content_lines = []
     self.frontmatter = ""
 
-  def load(self):
-    with open(self.path, 'r') as f:
+  def load(self, from_dir):
+    with open(os.path.join(from_dir, self.path), 'r') as f:
       content = f.read()
 
     start_of_backlinking_block = content.find("<!-- begin backlinker content -->")
@@ -48,6 +63,9 @@ class Note(object):
     self.frontmatter = content[1].strip()
 
     self.parse_titles()
+
+  def as_link(self):
+    return f"[{self.title}]({urllib.parse.quote(os.path.basename(self.path))})"
 
   def parse_titles(self):
     self.title = self.content_lines[0].replace('#', '').strip()
@@ -72,7 +90,7 @@ def parse_links(text):
   return set(map(lambda link: link[0], links))
 
 
-def backlink(notes_list, input_dir):
+def backlink(notes_list):
 
   notes = dict()
   other_titles_mapping = dict()
@@ -105,7 +123,7 @@ def backlink(notes_list, input_dir):
 
   for title, link in links.items():
     if link.destination is None:
-      note = Note(os.path.join(input_dir, f"{title}.md"))
+      note = Note(f"{title}.md")
       note.title = title
 
       link.destination = note
@@ -121,53 +139,65 @@ def load_notes(input_dir):
 
   for path in input_paths:
     print(f'Loading {path}')
-    note = Note(path)
-    note.load()
+    note = Note(os.path.basename(path))
+    note.load(input_dir)
 
     notes.append(note)
 
   return notes
 
 
-def output_notes(notes, links, output_dir):
+def render_notes(notes, links, rewrite_as_links):
+
+  rendered_notes = dict()
   for title, note in notes.items():
     link = links.get(title, None)
     other_title_links = list(
         filter(lambda link: link.title in note.other_titles, list(links.values())))
 
-    rendered = render_note(note, link, other_title_links)
+    rendered = render_note(note, link, other_title_links, rewrite_as_links)
+    rendered_notes[note.path] = rendered
 
-    output_path = os.path.join(output_dir, os.path.basename(note.path))
+  return rendered_notes
+
+
+def output_notes(rendered_notes, output_dir):
+
+  for path, rendered in rendered_notes.items():
+
+    output_path = os.path.join(output_dir, path)
+
     with open(output_path, 'w') as f:
       f.write(rendered)
 
 
-def render_note(note, link, other_title_links):
+def render_note(note, link, other_title_links, rewrite_as_links):
   rendered = f"""---
 {note.frontmatter}
 ---
 
 # {note.title}
-{render_note_other_titles(note)}
+{render_note_other_titles(note, rewrite_as_links)}
 {note.content}
-{render_note_backlinks(note, link, other_title_links)}
+{render_note_backlinks(note, link, other_title_links, rewrite_as_links)}
 """
 
   return rendered.rstrip() + "\n"
 
 
-def render_note_other_titles(note):
+def render_note_other_titles(note, rewrite_as_links):
   if note.other_titles == []:
     return ""
 
   rendered = "\naka"
   for title in note.other_titles:
-    rendered += f" [[{title}]]"
+    rendered += " "
+    rendered += f"[{title}]({urllib.parse.quote(os.path.basename(note.path))})" if rewrite_as_links else f"[[{title}]]"
 
   return rendered
 
 
-def render_note_backlinks(note, link, other_title_links):
+def render_note_backlinks(note, link, other_title_links, rewrite_as_links):
   rendered = """
 <!-- begin backlinker content -->
 
@@ -177,27 +207,34 @@ def render_note_backlinks(note, link, other_title_links):
   if link:
     link.sources.sort(key=lambda note: note.title)
     for source in link.sources:
-      rendered += f"\n[[{source.title}]]"
+      rendered += "\n"
+      rendered += ("- " + source.as_link()) if rewrite_as_links else f"[[{source.title}]]"
 
   other_title_links.sort(key=lambda link: link.title)
   for link in other_title_links:
     rendered += f"\n\nas _{link.title}_\n"
     link.sources.sort(key=lambda note: note.title)
     for source in link.sources:
-      rendered += f"\n[[{source.title}]]"
+      rendered += "\n"
+      rendered += ("- " + source.as_link()) if rewrite_as_links else f"[[{source.title}]]"
 
   rendered += "\n"
 
   return rendered
 
 
-def run_backlinker(input_dir, output_dir):
+def run_backlinker(input_dir, output_dir, rewrite_as_links=False):
 
   notes_list = load_notes(input_dir)
 
-  notes, links = backlink(notes_list, input_dir)
+  notes, links = backlink(notes_list)
 
   for link in links.values():
-    link.rewrite_in_notes()
+    if rewrite_as_links:
+      link.rewrite_in_notes()
+    else:
+      link.update_aliases_in_notes()
 
-  output_notes(notes, links, output_dir)
+  rendered_notes = render_notes(notes, links, rewrite_as_links)
+
+  output_notes(rendered_notes, output_dir)

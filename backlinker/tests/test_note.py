@@ -9,8 +9,8 @@ from .fixtures import example_note_one, example_note_two, example_note_three
 def test_note_one_load(example_note_one):
 
   with patch("builtins.open", new_callable=mock_open, read_data=example_note_one['file_contents']):
-    note = Note("test/path/note_one.md")
-    note.load()
+    note = Note("note_one.md")
+    note.load("test/path/")
 
   assert note.title == example_note_one['expected'].title
   assert note.frontmatter == example_note_one['expected'].frontmatter
@@ -26,8 +26,8 @@ def test_note_one_load(example_note_one):
 def test_note_two_load(example_note_two):
 
   with patch("builtins.open", new_callable=mock_open, read_data=example_note_two['file_contents']):
-    note = Note("test/path/note_two.md")
-    note.load()
+    note = Note("note_two.md")
+    note.load("test/path/")
 
   assert note.title == example_note_two['expected'].title
   assert note.frontmatter == example_note_two['expected'].frontmatter
@@ -43,8 +43,8 @@ def test_note_two_load(example_note_two):
 def test_note_three_load(example_note_three):
 
   with patch("builtins.open", new_callable=mock_open, read_data=example_note_three['file_contents']):
-    note = Note("test/path/note_three.md")
-    note.load()
+    note = Note("note_three.md")
+    note.load("test/path/")
 
   assert note.title == example_note_three['expected'].title
   assert note.frontmatter == example_note_three['expected'].frontmatter

@@ -7,7 +7,7 @@ from .fixtures import example_notes, example_note_one, example_note_two, example
 def test_render_note_one(example_notes):
 
   rendered = render_note(example_notes['one']['expected'], example_notes['one']
-                         ['link'], example_notes['one']['other_title_links'])
+                         ['link'], example_notes['one']['other_title_links'], False)
 
   assert example_notes['one']['file_contents'] == rendered
 
@@ -15,14 +15,14 @@ def test_render_note_one(example_notes):
 def test_render_note_two(example_notes):
 
   rendered = render_note(example_notes['two']['expected'], example_notes['two']
-                         ['link'], example_notes['two']['other_title_links'])
+                         ['link'], example_notes['two']['other_title_links'], False)
 
   assert example_notes['two']['file_contents'] == rendered
 
 
 def test_render_note_three(example_notes):
 
-  rendered = render_note(example_notes['three']['expected'], None, [])
+  rendered = render_note(example_notes['three']['expected'], None, [], False)
 
   # backlinker content section in note_three.md is incorrect, assert on render before that
 
