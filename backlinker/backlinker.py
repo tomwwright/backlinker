@@ -17,6 +17,14 @@ class Link(object):
     self.sources = []
     self.destination = None
 
+  def rewrite_in_notes(self):
+    is_alternate_title = self.title != self.destination.title
+    for source in self.sources:
+      pattern = re.compile(f'\\[\\[{re.escape(self.title)}(\\|.*?)?\\]\\]')
+      new_link_text = f"[[{self.title}|{self.destination.title}]]" if is_alternate_title else f"[[{self.title}]]"
+      (updated_content, _) = pattern.subn(new_link_text, source.content)
+      source.content = updated_content
+
 
 class Note(object):
 
@@ -65,16 +73,14 @@ def parse_links(text):
   return set(map(lambda link: link[0], links))
 
 
-def backlink(input_dir):
-  input_paths = glob.glob(os.path.join(input_dir, "*.md"))
+def backlink(notes_list, input_dir):
 
   notes = dict()
   other_titles_mapping = dict()
   links = dict()
-  for path in input_paths:
-    print(f'Backlinking {path}')
-    note = Note(path)
-    note.load()
+  for note in notes_list:
+    print(f'Backlinking {note.path}')
+
     if note.title in notes:
       raise ValueError(f'note title \'{note.title}\' occurs more than once')
     notes[note.title] = note
@@ -107,6 +113,21 @@ def backlink(input_dir):
       notes[title] = note
 
   return notes, links
+
+
+def load_notes(input_dir):
+  input_paths = glob.glob(os.path.join(input_dir, "*.md"))
+
+  notes = list()
+
+  for path in input_paths:
+    print(f'Loading {path}')
+    note = Note(path)
+    note.load()
+
+    notes.append(note)
+
+  return notes
 
 
 def output_notes(notes, links, output_dir):
@@ -171,19 +192,13 @@ def render_note_backlinks(note, link, other_title_links):
   return rendered
 
 
-def update_link_in_content(link):
-  is_alternate_title = link.title != link.destination.title
-  for source in link.sources:
-    pattern = re.compile(f'\[\[{re.escape(link.title)}(\|.*?)?\]\]')
-    new_link_text = f"[[{link.title}|{link.destination.title}]]" if is_alternate_title else f"[[{link.title}]]"
-    (updated_content, substitutions_count) = pattern.subn(new_link_text, source.content)
-    source.content = updated_content
-
-
 def run_backlinker(input_dir, output_dir):
-  notes, links = backlink(input_dir)
+
+  notes_list = load_notes(input_dir)
+
+  notes, links = backlink(notes_list, input_dir)
 
   for link in links.values():
-    update_link_in_content(link)
+    link.rewrite_in_notes()
 
   output_notes(notes, links, output_dir)
