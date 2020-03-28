@@ -154,7 +154,7 @@ def render_note(note, link, other_title_links):
 {render_note_backlinks(note, link, other_title_links)}
 """
 
-  return rendered
+  return rendered.rstrip() + "\n"
 
 
 def render_note_other_titles(note):
