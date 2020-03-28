@@ -8,7 +8,6 @@ autopep8 = "*"
 rope = "*"
 
 [packages]
-pyyaml = "*"
 
 [requires]
 python_version = "3.7"

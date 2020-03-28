@@ -25,7 +25,7 @@ class Note(object):
     self.other_titles = []
     self.content = ""
     self.content_lines = []
-    self.frontmatter = {}
+    self.frontmatter = ""
 
   def load(self):
     with open(self.path, 'r') as f:
@@ -38,7 +38,7 @@ class Note(object):
     content = content.split('---', 2)
 
     self.content_lines = content[2].strip().split('\n')
-    self.frontmatter = yaml.load(content[1])
+    self.frontmatter = content[1].strip()
 
     self.parse_titles()
 
@@ -124,7 +124,7 @@ def output_notes(notes, links, output_dir):
 
 def render_note(note, link, other_title_links):
   rendered = f"""---
-{yaml.dump(note.frontmatter).strip()}
+{note.frontmatter}
 ---
 
 # {note.title}
