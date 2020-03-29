@@ -21,7 +21,11 @@ def parse_arguments():
 
   parser.add_argument('--rewrite-as-links', dest='rewrite_as_links', action='store_true')
   parser.add_argument('--no-rewrite-as-links', dest='rewrite_as_links', action='store_false')
-  parser.set_defaults(rewrite_as_links=False)
+
+  parser.add_argument('--render-frontmatter', dest='render_frontmatter', action='store_true')
+  parser.add_argument('--no-render-frontmatter', dest='render_frontmatter', action='store_false')
+
+  parser.set_defaults(rewrite_as_links=False, render_frontmatter=True)
 
   return parser.parse_args()
 
@@ -29,4 +33,4 @@ def parse_arguments():
 def cli():
   args = parse_arguments()
 
-  run_backlinker(args.input, args.output, args.rewrite_as_links)
+  run_backlinker(args.input, args.output, args.rewrite_as_links, args.render_frontmatter)

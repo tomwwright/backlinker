@@ -147,7 +147,7 @@ def load_notes(input_dir):
   return notes
 
 
-def render_notes(notes, links, rewrite_as_links):
+def render_notes(notes, links, rewrite_as_links, render_frontmatter):
 
   rendered_notes = dict()
   for title, note in notes.items():
@@ -155,7 +155,7 @@ def render_notes(notes, links, rewrite_as_links):
     other_title_links = list(
         filter(lambda link: link.title in note.other_titles, list(links.values())))
 
-    rendered = render_note(note, link, other_title_links, rewrite_as_links)
+    rendered = render_note(note, link, other_title_links, rewrite_as_links, render_frontmatter)
     rendered_notes[note.path] = rendered
 
   return rendered_notes
@@ -171,12 +171,17 @@ def output_notes(rendered_notes, output_dir):
       f.write(rendered)
 
 
-def render_note(note, link, other_title_links, rewrite_as_links):
-  rendered = f"""---
+def render_note(note, link, other_title_links, rewrite_as_links, render_frontmatter):
+  rendered = ""
+
+  if render_frontmatter:
+    rendered += f"""---
 {note.frontmatter}
 ---
 
-# {note.title}
+"""
+
+  rendered += f"""# {note.title}
 {render_note_other_titles(note, rewrite_as_links)}
 {note.content}
 {render_note_backlinks(note, link, other_title_links, rewrite_as_links)}
@@ -223,7 +228,7 @@ def render_note_backlinks(note, link, other_title_links, rewrite_as_links):
   return rendered
 
 
-def run_backlinker(input_dir, output_dir, rewrite_as_links=False):
+def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontmatter=True):
 
   notes_list = load_notes(input_dir)
 
@@ -235,6 +240,6 @@ def run_backlinker(input_dir, output_dir, rewrite_as_links=False):
     else:
       link.update_aliases_in_notes()
 
-  rendered_notes = render_notes(notes, links, rewrite_as_links)
+  rendered_notes = render_notes(notes, links, rewrite_as_links, render_frontmatter)
 
   output_notes(rendered_notes, output_dir)
