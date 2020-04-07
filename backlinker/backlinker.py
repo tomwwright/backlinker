@@ -132,6 +132,85 @@ def backlink(notes_list):
   return notes, links
 
 
+def _remove_note_from_links(note, links):
+  # remove the note from the sources of its links
+  for link_title in note.find_links():
+    if link_title in links:
+      link = links[link_title]
+      link.sources.remove(note)
+
+      if len(link.sources) == 0:
+        del links[link_title]
+
+
+def _exclude_note_and_referencing_notes_by_title(notes, links, title):
+
+  excluded_referencing_note_titles = set()
+
+  # delete any notes with excluded titles
+  if title in notes:
+    _remove_note_from_links(notes[title], links)
+    del notes[title]
+
+  # handle any link to excluded title
+  if title in links:
+
+    # remove the link itself
+    link_to_excluded_note = links[title]
+    del links[title]
+
+    # exclude any referencing notes and record the titles of the referencing note
+    for note in link_to_excluded_note.sources:
+      if note.title in notes:
+        del notes[note.title]
+
+      excluded_referencing_note_titles.add(note.title)
+      for other_title in note.other_titles:
+        excluded_referencing_note_titles.add(other_title)
+
+      _remove_note_from_links(note, links)
+
+  return excluded_referencing_note_titles
+
+
+def _redact_links_to_excluded_notes(notes, links, link_titles_to_redact):
+  redacted = Note("REDACTED.md")
+  redacted.title = "REDACTED"
+  redacted.content = "This content has been removed. Maybe it's a secret?"
+
+  did_redact_links = False
+  for title in link_titles_to_redact:
+    if title in links:
+      links[title].destination = redacted
+      did_redact_links = True
+
+  if did_redact_links:
+    notes['REDACTED'] = redacted
+
+
+def exclude_notes(notes, links, titles_to_exclude):
+  """
+  Excludes items from `notes` dict that have a link to any of the given `titles_to_exclude`.
+  Does not consider aliases during exclusion, primary title must be passed.
+  Links to excluded notes are redirected to a REDACTED note.
+  """
+
+  filtered_notes = dict(notes)
+  filtered_links = dict(links)
+
+  excluded_referencing_note_titles = set()
+
+  # iterate exclusion titles and remove directly referencing notes and links
+  for title in titles_to_exclude:
+    excluded_referencing_note_titles.update(_exclude_note_and_referencing_notes_by_title(
+        filtered_notes, filtered_links,  title))
+
+  # now replace links to deleted notes with link to REDACTED note
+  _redact_links_to_excluded_notes(filtered_notes, filtered_links, excluded_referencing_note_titles)
+
+  return filtered_notes, filtered_links
+
+
 def load_notes(input_dir):
   input_paths = glob.glob(os.path.join(input_dir, "*.md"))
 
@@ -230,11 +309,18 @@ def render_note_backlinks(note, link, other_title_links, rewrite_as_links):
   return rendered
 
 
-def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontmatter=True):
+def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontmatter=True, exclude_links_to=[]):
 
   notes_list = load_notes(input_dir)
 
   notes, links = backlink(notes_list)
+
+  if len(exclude_links_to) > 0:
+    number_of_notes_before_excluding = len(notes)
+    number_of_links_before_excluding = len(links)
+    notes, links = exclude_notes(notes, links, exclude_links_to)
+    print(
+        f'Excluded {number_of_notes_before_excluding - len(notes)} notes ({number_of_links_before_excluding - len(links)} links)')
 
   for link in links.values():
     if rewrite_as_links:
