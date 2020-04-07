@@ -131,16 +131,16 @@ def example_notes(example_note_one, example_note_two, example_note_three):
 
   one_link = Link(example_note_one['expected'].title)
   one_link.destination = example_note_one['expected']
-  one_link.sources = [example_note_three['expected']]
+  one_link.sources = {example_note_three['expected']}
 
   one_alias_link = Link("Note 1 Alias")
   one_alias_link.destination = example_note_one['expected']
-  one_alias_link.sources = [example_note_two['expected']]
+  one_alias_link.sources = {example_note_two['expected']}
 
   # prepare link for two
   two_link = Link(example_note_two['expected'].title)
   two_link.destination = example_note_two['expected']
-  two_link.sources = [example_note_one['expected']]
+  two_link.sources = {example_note_one['expected']}
 
   return {
       "one": example_note_one,

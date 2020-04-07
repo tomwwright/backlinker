@@ -14,7 +14,7 @@ class Link(object):
 
   def __init__(self, title):
     self.title = title
-    self.sources = []
+    self.sources = set()
     self.destination = None
 
   def as_soft_link(self):
@@ -110,7 +110,7 @@ def backlink(notes_list):
     for link in note.find_links():
       if link not in links:
         links[link] = Link(link)
-      links[link].sources.append(note)
+      links[link].sources.add(note)
 
   for title, note in notes.items():
 
@@ -210,16 +210,18 @@ def render_note_backlinks(note, link, other_title_links, rewrite_as_links):
 """
 
   if link:
-    link.sources.sort(key=lambda note: note.title)
-    for source in link.sources:
+    sorted_sources = list(link.sources)
+    sorted_sources.sort(key=lambda note: note.title)
+    for source in sorted_sources:
       rendered += "\n"
       rendered += ("- " + source.as_link()) if rewrite_as_links else f"[[{source.title}]]"
 
   other_title_links.sort(key=lambda link: link.title)
   for link in other_title_links:
     rendered += f"\n\nas _{link.title}_\n"
-    link.sources.sort(key=lambda note: note.title)
-    for source in link.sources:
+    sorted_sources = list(link.sources)
+    sorted_sources.sort(key=lambda note: note.title)
+    for source in sorted_sources:
       rendered += "\n"
       rendered += ("- " + source.as_link()) if rewrite_as_links else f"[[{source.title}]]"
 
