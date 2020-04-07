@@ -96,7 +96,7 @@ modified: "2020-03-27T00:06:13.163Z"'''
   expected.other_titles = {
       "Note 3 Alias"
   }
-  expected.content = """tags [[Tag]] [[Notes]]
+  expected.content = """tags [[Tag]] [[Notes]] [[Secret]]
 
 This is some content.
 

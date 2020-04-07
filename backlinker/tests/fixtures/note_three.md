@@ -8,7 +8,7 @@ modified: "2020-03-27T00:06:13.163Z"
 # Note 3
 
 aka [[Note 3 Alias]]
-tags [[Tag]] [[Notes]]
+tags [[Tag]] [[Notes]] [[Secret]]
 
 This is some content.
 

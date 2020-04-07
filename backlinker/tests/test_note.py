@@ -53,5 +53,6 @@ def test_note_three_load(example_note_three):
   assert note.find_links() == {
       "Tag",
       "Notes",
+      "Secret",
       "Note 1"
   }
