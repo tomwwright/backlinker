@@ -21,8 +21,8 @@ class Link(object):
     is_alternate_title = self.title != self.destination.title
     return f"[[{self.title}|{self.destination.title}]]" if is_alternate_title else f"[[{self.title}]]"
 
-  def as_link(self):
-    return f"[{self.title}]({urllib.parse.quote(os.path.basename(self.destination.path))})"
+  def as_link(self, title_override=None):
+    return f"[{title_override if title_override else self.title}]({urllib.parse.quote(os.path.basename(self.destination.path))})"
 
   def as_regex(self):
     return re.compile(f'\\[\\[{re.escape(self.title)}(\\|.*?)?\\]\\]')
@@ -33,10 +33,10 @@ class Link(object):
       (updated_content, _) = pattern.subn(self.as_soft_link(), source.content)
       source.content = updated_content
 
-  def rewrite_in_notes(self):
+  def rewrite_in_notes(self, title_override=None):
     for source in self.sources:
       pattern = self.as_regex()
-      (updated_content, _) = pattern.subn(self.as_link(), source.content)
+      (updated_content, _) = pattern.subn(self.as_link(title_override), source.content)
       source.content = updated_content
 
 
@@ -324,7 +324,10 @@ def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontma
 
   for link in links.values():
     if rewrite_as_links:
-      link.rewrite_in_notes()
+      if link.destination.title == "REDACTED":
+        link.rewrite_in_notes("REDACTED")
+      else:
+        link.rewrite_in_notes()
     else:
       link.update_aliases_in_notes()
 
