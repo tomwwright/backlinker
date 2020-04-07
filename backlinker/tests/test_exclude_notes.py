@@ -35,7 +35,7 @@ def test_exclude_linked_title(example_notes):
   assert "Note 2" not in notes  # deleted for excluded title
   assert "Note 3" in notes  # redacted for referencing Note 1
   assert "REDACTED" in notes
-  assert len(links_to_redacted) == 1
+  assert len(links_to_redacted) == 2  # link from Note 3 and generated REDACTED link
 
 
 def test_exclude_existing_tag(example_notes):
@@ -59,8 +59,9 @@ def test_exclude_existing_tag_for_referenced_note(example_notes):
 
   assert len(notes.values()) == len(example_notes['notes'].values()) - 1
 
-  assert len(links_to_redacted) == 1  # just Note 1
+  assert len(links_to_redacted) == 2  # Note 1 and generated REDACTED link
   assert links_to_redacted[0].sources == {notes['Note 1']}
+  assert links_to_redacted[1].sources == {notes['Note 1']}
   assert "Note 1" in notes  # exists, with link to Note 2 redacted
 
   assert "Note 2" not in notes  # deleted for referencing Other Tag

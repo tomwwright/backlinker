@@ -178,14 +178,19 @@ def _redact_links_to_excluded_notes(notes, links, link_titles_to_redact):
   redacted.title = "REDACTED"
   redacted.content = "This content has been removed. Maybe it's a secret?"
 
+  link_to_redacted = Link("REDACTED")
+  link_to_redacted.destination = redacted
+
   did_redact_links = False
   for title in link_titles_to_redact:
     if title in links:
       links[title].destination = redacted
+      link_to_redacted.sources.update(links[title].sources)
       did_redact_links = True
 
   if did_redact_links:
     notes['REDACTED'] = redacted
+    links['REDACTED'] = link_to_redacted
 
 
 def exclude_notes(notes, links, titles_to_exclude):
