@@ -6,23 +6,35 @@ from .fixtures import example_notes, example_note_one, example_note_two, example
 
 def test_render_note_one(example_notes):
 
-  rendered = render_note(example_notes['one']['expected'], example_notes['one']
-                         ['link'], example_notes['one']['other_title_links'], False, True)
+  note = example_notes['one']['expected']
+  link = example_notes['links'][note.title]
+  other_title_links = list(
+      filter(lambda link: link.title in note.other_titles, example_notes['links'].values()))
+
+  print(other_title_links)
+
+  rendered = render_note(note, link, other_title_links, False, True)
 
   assert example_notes['one']['file_contents'] == rendered
 
 
 def test_render_note_two(example_notes):
 
-  rendered = render_note(example_notes['two']['expected'], example_notes['two']
-                         ['link'], example_notes['two']['other_title_links'], False, True)
+  note = example_notes['two']['expected']
+  link = example_notes['links'][note.title]
+  other_title_links = list(
+      filter(lambda link: link.title in note.other_titles, example_notes['links'].values()))
+
+  rendered = render_note(note, link, other_title_links, False, True)
 
   assert example_notes['two']['file_contents'] == rendered
 
 
 def test_render_note_three(example_notes):
 
-  rendered = render_note(example_notes['three']['expected'], None, [], False, True)
+  note = example_notes['three']['expected']
+
+  rendered = render_note(note, None, [], False, True)
 
   # backlinker content section in note_three.md is incorrect, assert on render before that
 
