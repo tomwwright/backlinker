@@ -3,7 +3,7 @@ import pytest
 import os.path
 
 from ..backlinker import Note
-from .fixtures import example_note_one, example_note_two, example_note_three
+from .fixtures.notes import example_note_one, example_note_two, example_note_three
 
 
 def test_note_one_load(example_note_one):

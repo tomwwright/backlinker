@@ -1,7 +1,7 @@
 from ..backlinker import exclude_notes
 
 from . import fixtures
-from .fixtures import example_notes, example_note_one, example_note_two, example_note_three
+from .fixtures.notes import example_notes, example_note_one, example_note_two, example_note_three
 
 
 def test_exclude_nonexistent_title(example_notes):

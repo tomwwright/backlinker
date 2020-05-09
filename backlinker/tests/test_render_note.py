@@ -1,7 +1,7 @@
 from ..backlinker import render_note
 
 from . import fixtures
-from .fixtures import example_notes, example_note_one, example_note_two, example_note_three
+from .fixtures.notes import example_notes, example_note_one, example_note_two, example_note_three
 
 
 def test_render_note_one(example_notes):
