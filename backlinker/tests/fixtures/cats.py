@@ -193,6 +193,10 @@ def fixture_cats():
       kittens['note']
   }
 
+  categories['link'].sources = {
+      drafts['note']
+  }
+
   dogs['link'].sources = {
       cats['note']
   }
@@ -236,6 +240,7 @@ def fixture_cats():
       "Mice": mice,
       "Ship\'s Cat": ships_cat,
       "notes": {
+          "Animals": animals["note"],
           "Cats": cats["note"],
           "Categories": categories["note"],
           "Dogs": dogs["note"],
@@ -247,6 +252,7 @@ def fixture_cats():
       "links": {
           "Animals": animals["link"],
           "Cat": cat_link,
+          "Categories": categories["link"],
           "Dogs": dogs["link"],
           "Drafts": drafts["link"],
           "Kitten": kitten_link,

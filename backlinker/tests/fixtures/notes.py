@@ -153,25 +153,25 @@ def example_notes(example_note_one, example_note_two, example_note_three):
   notes_note.title = "Notes"
   notes_link = Link("Notes")
   notes_link.destination = notes_note
-  notes_link.sources = [example_note_three['expected']]
+  notes_link.sources = {example_note_three['expected']}
 
   other_tag_note = Note("Other Tag.md")
   other_tag_note.title = "Other Tag"
   other_tag_link = Link("Other Tag")
   other_tag_link.destination = other_tag_note
-  other_tag_link.sources = [example_note_two['expected']]
+  other_tag_link.sources = {example_note_two['expected']}
 
   secret_note = Note("Secret.md")
   secret_note.title = "Secret"
   secret_link = Link("Secret")
   secret_link.destination = secret_note
-  secret_link.sources = [example_note_three['expected']]
+  secret_link.sources = {example_note_three['expected']}
 
   complicated_name_note = Note("Note -- complicated 'title'")
   complicated_name_note.title = "Note -- complicated 'title'"
   complicated_name_link = Link("Note -- complicated 'title'")
   complicated_name_link.destination = complicated_name_note
-  complicated_name_link.sources = [example_note_one['expected']]
+  complicated_name_link.sources = {example_note_one['expected']}
 
   return {
       "one": example_note_one,
@@ -182,6 +182,7 @@ def example_notes(example_note_one, example_note_two, example_note_three):
           "Note 2": example_note_two['expected'],
           "Note 3": example_note_three['expected'],
           "Note -- complicated 'title'": complicated_name_note,
+          "Notes": notes_note,
           "Other Tag": other_tag_note,
           "Secret": secret_note,
           "Tag": tag_note
@@ -191,6 +192,7 @@ def example_notes(example_note_one, example_note_two, example_note_three):
           "Note 1 Alias": one_alias_link,
           "Note 2": two_link,
           "Note -- complicated 'title'": complicated_name_link,
+          "Notes": notes_link,
           "Other Tag": other_tag_link,
           "Secret": secret_link,
           "Tag": tag_link
