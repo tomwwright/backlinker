@@ -22,7 +22,7 @@ title: Cats'''
 
 Cats, also called domestic cats (Felis catus), are small, carnivorous (meat-eating) mammals, of the family Felidae. Domestic cats are often called house cats when kept as indoor pets.
 
-A cat is sometimes called a kitty. A young cat is called a [[kitten]]. A female cat that has not had its sex organs removed is called a queen. A male cat that has not had its sex organs removed is called a tom.
+A cat is sometimes called a kitty. A young cat is called a [[Kitten]]. A female cat that has not had its sex organs removed is called a queen. A male cat that has not had its sex organs removed is called a tom.
 
 ## Likes and Dislikes
 
@@ -41,7 +41,7 @@ The table below describes some of the common likes and dislikes of cats.
 
 ## Cats with Jobs
 
-Some cats have jobs, often catching [[mice]]. A cat that does this on a ship is called a [[Ship's Cat]].
+Some cats have jobs, often catching [[Mice]]. A cat that does this on a ship is called a [[Ship's Cat]].
 
 <!-- End Drafts -->"""
 
@@ -50,10 +50,10 @@ Some cats have jobs, often catching [[mice]]. A cat that does this on a ship is 
 
   links = {
       "Animals",
-      "kitten",
+      "Kitten",
       "Kittens",
       "Dogs",
-      "mice",
+      "Mice",
       "Ship's Cat"
   }
 
@@ -108,7 +108,7 @@ title: Kittens"""
   note.other_titles = {"Kitten"}
   note.content = """tags [[Animals]]
 
-A kitten is a baby [[cat]].
+A kitten is a baby [[Cat]].
 
 Kittens play endlessly. It is how they do their learning. They will play their favourite games, such as 'hide and pounce', with almost anyone or anything. Soft balls on strings are a standard toy; so is a scratching post."""
 
@@ -117,7 +117,7 @@ Kittens play endlessly. It is how they do their learning. They will play their f
 
   links = {
       "Animals",
-      "cat"
+      "Cat"
   }
 
   return {
@@ -188,11 +188,43 @@ def fixture_cats():
   mice = blank_note("Mice")
   ships_cat = note_ships_cat()
 
-  # prepare links for one
-
   animals['link'].sources = {
       cats['note'],
       kittens['note']
+  }
+
+  dogs['link'].sources = {
+      cats['note']
+  }
+
+  drafts['link'].sources = {
+      ships_cat['note']
+  }
+
+  kittens['link'].sources = {
+      cats['note']
+  }
+
+  mice['link'].sources = {
+      cats['note']
+  }
+
+  ships_cat['link'].sources = {
+      cats['note']
+  }
+
+  # alias links
+
+  cat_link = Link("Cat")
+  cat_link.destination = cats["note"]
+  cat_link.sources = {
+      kittens['note']
+  }
+
+  kitten_link = Link("Kitten")
+  kitten_link.destination = kittens["note"]
+  kitten_link.sources = {
+      cats['note']
   }
 
   return {
@@ -204,9 +236,22 @@ def fixture_cats():
       "Mice": mice,
       "Ship\'s Cat": ships_cat,
       "notes": {
-          "Cats": cats["note"]
+          "Cats": cats["note"],
+          "Categories": categories["note"],
+          "Dogs": dogs["note"],
+          "Drafts": drafts["note"],
+          "Kittens": kittens["note"],
+          "Mice": mice["note"],
+          "Ship\'s Cat": ships_cat["note"],
       },
       "links": {
-
+          "Animals": animals["link"],
+          "Cat": cat_link,
+          "Dogs": dogs["link"],
+          "Drafts": drafts["link"],
+          "Kitten": ships_cat["link"],
+          "Kittens": kitten_link,
+          "Mice": mice["link"],
+          "Ship's Cat": ships_cat["link"]
       }
   }
