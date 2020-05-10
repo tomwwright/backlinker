@@ -4,6 +4,7 @@ import os.path
 
 from ..backlinker import Note
 from .fixtures.notes import example_note_one, example_note_two, example_note_three
+from .fixtures.cats import fixture_cats
 
 
 def test_note_one_load(example_note_one):
@@ -56,3 +57,32 @@ def test_note_three_load(example_note_three):
       "Secret",
       "Note 1"
   }
+
+
+def _load_test(title, fixture):
+
+  with patch("builtins.open", new_callable=mock_open, read_data=fixture['file_contents']):
+    note = Note(f"{title}.md")
+    note.load("test/path/")
+
+  assert note.title == fixture['note'].title
+  assert note.frontmatter == fixture['note'].frontmatter
+  assert note.content == fixture['note'].content
+  assert note.other_titles == fixture['note'].other_titles
+  assert note.find_links() == fixture['links']
+
+
+def test_note_cats(fixture_cats):
+  _load_test("Cats", fixture_cats["Cats"])
+
+
+def test_note_drafts(fixture_cats):
+  _load_test("Drafts", fixture_cats["Drafts"])
+
+
+def test_note_kittens(fixture_cats):
+  _load_test("Kittens", fixture_cats["Kittens"])
+
+
+def test_note_ships_cat(fixture_cats):
+  _load_test("Ship\'s Cat", fixture_cats["Ship\'s Cat"])
