@@ -137,9 +137,11 @@ def _remove_note_from_links(note, links):
   for link_title in note.find_links():
     if link_title in links:
       link = links[link_title]
+      print(f'Unlinking excluded note source: {note.title} from {link.title}')
       link.sources.remove(note)
 
       if len(link.sources) == 0:
+        print(f'Deleting empty link: {link_title}')
         del links[link_title]
 
 
@@ -149,6 +151,7 @@ def _exclude_note_and_referencing_notes_by_title(notes, links, title):
 
   # delete any notes with excluded titles
   if title in notes:
+    print(f'Deleting excluded title: {title}')
     _remove_note_from_links(notes[title], links)
     del notes[title]
 
@@ -162,6 +165,7 @@ def _exclude_note_and_referencing_notes_by_title(notes, links, title):
     # exclude any referencing notes and record the titles of the referencing note
     for note in link_to_excluded_note.sources:
       if note.title in notes:
+        print(f'Deleting note linked to excluded title: {note.title}')
         del notes[note.title]
 
       excluded_referencing_note_titles.add(note.title)
@@ -178,19 +182,15 @@ def _redact_links_to_excluded_notes(notes, links, link_titles_to_redact):
   redacted.title = "REDACTED"
   redacted.content = "This content has been removed. Maybe it's a secret?"
 
-  link_to_redacted = Link("REDACTED")
-  link_to_redacted.destination = redacted
-
   did_redact_links = False
   for title in link_titles_to_redact:
     if title in links:
+      print(f'Redacting links to: {title}')
       links[title].destination = redacted
-      link_to_redacted.sources.update(links[title].sources)
       did_redact_links = True
 
   if did_redact_links:
     notes['REDACTED'] = redacted
-    links['REDACTED'] = link_to_redacted
 
 
 def exclude_notes(notes, links, titles_to_exclude):
@@ -275,11 +275,11 @@ def render_note(note, link, other_title_links, rewrite_as_links, render_frontmat
 
 
 def render_note_other_titles(note, rewrite_as_links):
-  if note.other_titles == []:
+  if note.other_titles == {}:
     return ""
 
   rendered = "\naka"
-  for title in note.other_titles:
+  for title in sorted(list(note.other_titles)):
     rendered += " "
     rendered += f"[{title}]({urllib.parse.quote(os.path.basename(note.path))})" if rewrite_as_links else f"[[{title}]]"
 
@@ -293,23 +293,23 @@ def render_note_backlinks(note, link, other_title_links, rewrite_as_links):
 ---
 """
 
-  if link:
+  if link and len(link.sources) > 0:
     sorted_sources = list(link.sources)
     sorted_sources.sort(key=lambda note: note.title)
+    rendered += "\n"
     for source in sorted_sources:
-      rendered += "\n"
       rendered += ("- " + source.as_link()) if rewrite_as_links else f"[[{source.title}]]"
+      rendered += "\n"
 
   other_title_links.sort(key=lambda link: link.title)
   for link in other_title_links:
-    rendered += f"\n\nas _{link.title}_\n"
+    rendered += f"\nas _{link.title}_\n"
     sorted_sources = list(link.sources)
     sorted_sources.sort(key=lambda note: note.title)
     for source in sorted_sources:
       rendered += "\n"
       rendered += ("- " + source.as_link()) if rewrite_as_links else f"[[{source.title}]]"
-
-  rendered += "\n"
+    rendered += "\n"
 
   return rendered
 

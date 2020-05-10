@@ -249,8 +249,8 @@ def fixture_cats():
           "Cat": cat_link,
           "Dogs": dogs["link"],
           "Drafts": drafts["link"],
-          "Kitten": ships_cat["link"],
-          "Kittens": kitten_link,
+          "Kitten": kitten_link,
+          "Kittens": kittens["link"],
           "Mice": mice["link"],
           "Ship's Cat": ships_cat["link"]
       }
