@@ -44,7 +44,7 @@ class Note(object):
 
   def __init__(self, path):
     self.path = path
-    self.other_titles = []
+    self.other_titles = {}
     self.content = ""
     self.content_lines = []
     self.frontmatter = ""
@@ -71,7 +71,7 @@ class Note(object):
     self.title = self.content_lines[0].replace('#', '').strip()
     self.content_lines = self.content_lines[1:]
 
-    self.other_titles = []
+    self.other_titles = {}
     if len(self.content_lines) > 1 and self.content_lines[1].startswith('aka'):
       self.other_titles = parse_links(self.content_lines[1])
       self.content_lines = self.content_lines[2:]
