@@ -47,40 +47,45 @@ class Note(object):
     self.path = path
     self.other_titles = {}
     self.content = ""
-    self.content_lines = []
     self.frontmatter = ""
 
   def load(self, from_dir):
     with open(os.path.join(from_dir, self.path), 'r') as f:
-      content = f.read()
+      file_content = f.read()
 
-    start_of_backlinking_block = content.find("<!-- begin backlinker content -->")
+    start_of_backlinking_block = file_content.find("<!-- begin backlinker content -->")
     if start_of_backlinking_block != -1:
-      content = content[:start_of_backlinking_block]
+      file_content = file_content[:start_of_backlinking_block]
 
-    content = content.split('---', 2)
+    file_content = file_content.split('---', 2)
 
-    self.content_lines = content[2].strip().split('\n')
-    self.frontmatter = content[1].strip()
+    self.frontmatter = file_content[1].strip()
+    self.content = file_content[2].strip()
 
-    self.parse_titles()
+    self._parse_titles_from_content()
 
   def as_link(self):
     return f"[{self.title}]({urllib.parse.quote(os.path.basename(self.path))})"
 
-  def parse_titles(self):
-    self.title = self.content_lines[0].replace('#', '').strip()
-    self.content_lines = self.content_lines[1:]
+  def _parse_titles_from_content(self):
+    '''
+    Parses the `# Title` and `aka [[Other Titles]]` lines from the start of the content
+    '''
+
+    content_lines = self.content.split('\n')
+
+    self.title = content_lines[0].replace('#', '').strip()
+    content_lines = content_lines[1:]
 
     self.other_titles = {}
-    if len(self.content_lines) > 1 and self.content_lines[1].startswith('aka'):
-      self.other_titles = parse_links(self.content_lines[1])
-      self.content_lines = self.content_lines[2:]
-    elif len(self.content_lines) > 2 and self.content_lines[2].startswith('aka'):
-      self.other_titles = parse_links(self.content_lines[2])
-      self.content_lines = self.content_lines[3:]
+    if len(content_lines) > 1 and content_lines[1].startswith('aka'):
+      self.other_titles = parse_links(content_lines[1])
+      content_lines = content_lines[2:]
+    elif len(content_lines) > 2 and content_lines[2].startswith('aka'):
+      self.other_titles = parse_links(content_lines[2])
+      content_lines = content_lines[3:]
 
-    self.content = "\n".join(self.content_lines).strip()
+    self.content = "\n".join(content_lines).strip()
 
   def find_links(self):
     return parse_links(self.content)
