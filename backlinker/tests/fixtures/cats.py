@@ -176,6 +176,58 @@ def blank_note(title):
 
 
 @pytest.fixture
+def fixture_cats_index():
+  note = Note("Index.md")
+  note.title = "Index"
+
+  note.content = """## A
+
+- [[Animals]]
+
+## C
+
+- [[Cat]] _Cats_
+- [[Categories]]
+- [[Cats]]
+
+## D
+
+- [[Dogs]]
+- [[Drafts]]
+
+## F
+
+- [[Felis catus]] _Cats_
+
+## K
+
+- [[Kitten]] _Kittens_
+- [[Kittens]]
+
+## M
+
+- [[Mice]]
+
+## S
+
+- [[Ship's Cat]]
+
+"""
+
+  link = Link(note.title)
+  link.destination = note
+
+  links = {}  # index is generated after backlinking and so generates no Links
+
+  return {
+      "file_contents": "",
+      "note": note,
+      "link": link,
+      "links": links
+  }
+
+
+@pytest.fixture
 def fixture_cats():
   '''Returns notes examples about Cats'''
 

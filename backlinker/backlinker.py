@@ -8,6 +8,7 @@ import os
 import glob
 import re
 import urllib.parse
+from itertools import groupby
 
 
 class Link(object):
@@ -130,6 +131,55 @@ def backlink(notes_list):
       notes[title] = note
 
   return notes, links
+
+
+def create_index_note(notes):
+
+  if 'Index' in notes:
+    raise Exception("Unable to create index if note with title 'Index' exists")
+
+  index = Note("Index.md")
+  index.title = "Index"
+
+  all_titles = set()
+  temporary_links = dict()
+  for note in notes.values():
+    titles = set([note.title]).union(note.other_titles)
+    all_titles.update(titles)
+    for title in titles:
+      temporary_link = Link(title)
+      temporary_link.sources.add(index)
+      temporary_link.destination = note
+      temporary_links[title] = temporary_link
+
+  sorted_titles = sorted(list(all_titles))
+  letter_groupings = {}
+
+  for k, g in groupby(sorted_titles, key=lambda title: title[0].upper()):
+    if k in letter_groupings:
+      letter_groupings[k] += g
+    else:
+      letter_groupings[k] = list(g)
+
+  content = ""
+
+  for letter in letter_groupings:
+    content += f"## {letter}\n\n"
+    for title in letter_groupings[letter]:
+      content += f"- [[{title}]]"
+
+      # if this is an alias, render the true title after
+      if title not in notes:
+        content += f" _{temporary_links[title].destination.title}_"
+
+      content += '\n'
+    content += '\n'
+
+  index.content = content
+
+  notes["Index"] = index
+
+  return temporary_links.values()
 
 
 def _remove_note_from_links(note, links):
@@ -314,7 +364,18 @@ def render_note_backlinks(note, link, other_title_links, rewrite_as_links):
   return rendered
 
 
-def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontmatter=True, exclude_links_to=[]):
+def render_links_in_content(links, rewrite_as_links):
+  for link in links:
+    if rewrite_as_links:
+      if link.destination.title == "REDACTED":
+        link.rewrite_in_notes("REDACTED")
+      else:
+        link.rewrite_in_notes()
+    else:
+      link.update_aliases_in_notes()
+
+
+def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontmatter=True, exclude_links_to=[], render_index=False):
 
   notes_list = load_notes(input_dir)
 
@@ -327,14 +388,11 @@ def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontma
     print(
         f'Excluded {number_of_notes_before_excluding - len(notes)} notes ({number_of_links_before_excluding - len(links)} links)')
 
-  for link in links.values():
-    if rewrite_as_links:
-      if link.destination.title == "REDACTED":
-        link.rewrite_in_notes("REDACTED")
-      else:
-        link.rewrite_in_notes()
-    else:
-      link.update_aliases_in_notes()
+  render_links_in_content(links.values(), rewrite_as_links)
+
+  if render_index:
+    index_links = create_index_note(notes)
+    render_links_in_content(index_links, rewrite_as_links)
 
   rendered_notes = render_notes(notes, links, rewrite_as_links, render_frontmatter)
 

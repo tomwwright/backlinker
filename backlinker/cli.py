@@ -11,7 +11,7 @@ def dir_path_arg_type(path):
   if os.path.isdir(path):
     return path
   else:
-    raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
+    raise argparse.ArgumentTypeError(f"readable_dir: {path} is not a valid path")
 
 
 def parse_arguments():
@@ -28,7 +28,11 @@ def parse_arguments():
   parser.add_argument('--render-frontmatter', dest='render_frontmatter', action='store_true')
   parser.add_argument('--no-render-frontmatter', dest='render_frontmatter', action='store_false')
 
-  parser.set_defaults(rewrite_as_links=False, render_frontmatter=True, exclude=[])
+  parser.add_argument('--render-index', dest='render_index', action='store_true')
+  parser.add_argument('--no-render-index', dest='render_index', action='store_false')
+
+  parser.set_defaults(rewrite_as_links=False, render_frontmatter=True,
+                      exclude=[], render_index=False)
 
   return parser.parse_args()
 
@@ -37,4 +41,4 @@ def cli():
   args = parse_arguments()
 
   run_backlinker(args.input, args.output, args.rewrite_as_links,
-                 args.render_frontmatter, args.exclude)
+                 args.render_frontmatter, args.exclude, args.render_index)

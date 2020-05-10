@@ -124,6 +124,49 @@ This is getting quite nested."""
 
 
 @pytest.fixture
+def example_notes_index():
+  note = Note("Index.md")
+  note.title = "Index"
+
+  note.content = """## N
+
+- [[Note -- complicated 'title']]
+- [[Note 1]]
+- [[Note 1 Alias]] _Note 1_
+- [[Note 2]]
+- [[Note 2 Alias]] _Note 2_
+- [[Note 3]]
+- [[Note 3 Alias]] _Note 3_
+- [[Notes]]
+
+## O
+
+- [[Other Tag]]
+
+## S
+
+- [[Secret]]
+
+## T
+
+- [[Tag]]
+
+"""
+
+  link = Link(note.title)
+  link.destination = note
+
+  links = {}  # index is generated after backlinking and so generates no Links
+
+  return {
+      "file_contents": "",
+      "note": note,
+      "link": link,
+      "links": links
+  }
+
+
+@pytest.fixture
 def example_notes(example_note_one, example_note_two, example_note_three):
   '''Returns three example note fixtures with links resolved'''
 
