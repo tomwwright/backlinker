@@ -96,6 +96,25 @@ def parse_links(text):
   return set(map(lambda link: link[0], links))
 
 
+def parse_sections(text, label):
+  """
+  Finds sections within `text` that are labelled `label` with the following format:
+
+  (assume label == 'SECTION')
+
+  <!-- SECTION -->
+  content
+  <!-- End SECTION -->
+
+  Function returns start, end, and content of matching sections
+  """
+  pattern = re.compile(f'<!-- {re.escape(label)} -->(.*?)<!-- End {re.escape(label)} -->', re.DOTALL)
+
+  sections_iter = pattern.finditer(text)
+
+  return list(map(lambda m: dict(start=m.start(), end=m.end(), content=m.group(1)), sections_iter))
+
+
 def backlink(notes_list):
 
   notes = dict()
