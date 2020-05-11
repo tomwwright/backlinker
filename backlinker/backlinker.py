@@ -290,6 +290,25 @@ def exclude_notes(notes, links, titles_to_exclude):
   return filtered_notes, filtered_links
 
 
+def _exclude_section_from_note(note, label):
+  """
+  Checks for sections with `label` in the note, omits the first occurrence, and the recurses
+  Recurrence is because the `start` and `end` of the following sections are not useful once the string has been modified. Simple to just look again
+  """
+
+  sections = parse_sections(note.content, label)
+  if len(sections) > 0:
+    print(f'Excluding \'{label}\' section from {note.title} ({sections[0]["end"] - sections[0]["start"]} characters)')
+    note.content = note.content[:sections[0]['start']] + note.content[sections[0]['end']:]
+    _exclude_section_from_note(note, label)
+
+
+def exclude_sections_from_notes(notes, exclusions):
+  for exclusion in exclusions:
+    for note in notes:
+      _exclude_section_from_note(note, exclusion)
+
+
 def load_notes(input_dir):
   input_paths = glob.glob(os.path.join(input_dir, "*.md"))
 
@@ -399,16 +418,19 @@ def render_links_in_content(links, rewrite_as_links):
       link.update_aliases_in_notes()
 
 
-def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontmatter=True, exclude_links_to=[], render_index=False):
+def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontmatter=True, exclusions=[], render_index=False):
 
   notes_list = load_notes(input_dir)
 
+  if len(exclusions) > 0:
+    exclude_sections_from_notes(notes_list, exclusions)
+
   notes, links = backlink(notes_list)
 
-  if len(exclude_links_to) > 0:
+  if len(exclusions) > 0:
     number_of_notes_before_excluding = len(notes)
     number_of_links_before_excluding = len(links)
-    notes, links = exclude_notes(notes, links, exclude_links_to)
+    notes, links = exclude_notes(notes, links, exclusions)
     print(
         f'Excluded {number_of_notes_before_excluding - len(notes)} notes ({number_of_links_before_excluding - len(links)} links)')
 

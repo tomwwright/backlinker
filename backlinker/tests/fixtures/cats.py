@@ -45,6 +45,27 @@ Some cats have jobs, often catching [[Mice]]. A cat that does this on a ship is 
 
 <!-- End Drafts -->"""
 
+  content_without_section = """tags [[Animals]]
+
+Cats, also called domestic cats (Felis catus), are small, carnivorous (meat-eating) mammals, of the family Felidae. Domestic cats are often called house cats when kept as indoor pets.
+
+A cat is sometimes called a kitty. A young cat is called a [[Kitten]]. A female cat that has not had its sex organs removed is called a queen. A male cat that has not had its sex organs removed is called a tom.
+
+## Likes and Dislikes
+
+The table below describes some of the common likes and dislikes of cats.
+
+| Thing       | Like | Dislike |
+| ----------- | :--: | :-----: |
+| [[Kittens]] |  x   |         |
+| Food        | xxx  |         |
+| [[Dogs]]    |      |    x    |
+| Attention   |  x   |         |
+| Belly Rub   |  x   |    x    |
+| Water       |      |    x    |
+
+"""
+
   link = Link(note.title)
   link.destination = note
 
@@ -61,7 +82,8 @@ Some cats have jobs, often catching [[Mice]]. A cat that does this on a ship is 
       "file_contents": file_contents,
       "note": note,
       "link": link,
-      "links": links
+      "links": links,
+      "content_without_section": content_without_section
   }
 
 
@@ -141,7 +163,15 @@ title: Ship\'s Cat"""
   note.other_titles = {}
   note.content = """tags [[Drafts]]
 
-TODO: Write about cats on ships here."""
+<!-- TODO -->
+
+TODO: Write about cats on ships here.
+
+<!-- End TODO -->"""
+
+  content_without_section = """tags [[Drafts]]
+
+"""
 
   link = Link(note.title)
   link.destination = note
@@ -154,7 +184,8 @@ TODO: Write about cats on ships here."""
       "file_contents": file_contents,
       "note": note,
       "link": link,
-      "links": links
+      "links": links,
+      "content_without_section": content_without_section
   }
 
 
