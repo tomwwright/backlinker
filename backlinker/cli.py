@@ -17,26 +17,30 @@ def dir_path_arg_type(path):
 
 def argument_parser():
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument('--input', type=dir_path_arg_type, required=True)
+  parser.add_argument('--input', type=dir_path_arg_type, required=True, help='input directory for .md notes to backlink')
 
   output_group = parser.add_mutually_exclusive_group(required=True)
-  output_group.add_argument('--output', type=dir_path_arg_type)
-  output_group.add_argument('--in-place', action='store_true')
+  output_group.add_argument('--output', type=dir_path_arg_type, help='output directory for backlinked .md notes')
+  output_group.add_argument('--in-place', action='store_true',
+                            help='render backlinked .md notes into the input directory -- limits other options to avoid destructive changes to existing notes')
 
   rewrite_group = parser.add_mutually_exclusive_group()
-  rewrite_group.add_argument('--rewrite-as-links', dest='rewrite_as_links', action='store_true')
-  rewrite_group.add_argument('--no-rewrite-as-links', dest='rewrite_as_links', action='store_false')
+  rewrite_group.add_argument('--rewrite-as-links', dest='rewrite_as_links', action='store_true',
+                             help='rewrite [[Link]] backlinker syntax as [Link](Link.md) link syntax')
+  rewrite_group.add_argument('--no-rewrite-as-links', dest='rewrite_as_links', action='store_false', help='do not rewrite [[Link]] backlinker syntax (default)')
 
   parser.add_argument('--exclude', type=str, nargs='+',
                       help='the list of note tags or titles to exclude from the render')
 
   frontmatter_group = parser.add_mutually_exclusive_group()
-  frontmatter_group.add_argument('--render-frontmatter', dest='render_frontmatter', action='store_true')
-  frontmatter_group.add_argument('--no-render-frontmatter', dest='render_frontmatter', action='store_false')
+  frontmatter_group.add_argument('--render-frontmatter', dest='render_frontmatter', action='store_true',
+                                 help='render YAML frontmatter in backlinked notes (default)')
+  frontmatter_group.add_argument('--no-render-frontmatter', dest='render_frontmatter', action='store_false',
+                                 help='omit any existing YAML frontmatter when rendering backlinked notes')
 
   index_group = parser.add_mutually_exclusive_group()
-  index_group.add_argument('--render-index', dest='render_index', action='store_true')
-  index_group.add_argument('--no-render-index', dest='render_index', action='store_false')
+  index_group.add_argument('--render-index', dest='render_index', action='store_true', help='generate an Index.md note')
+  index_group.add_argument('--no-render-index', dest='render_index', action='store_false', help='do not generate an Index.md note (default)')
 
   parser.set_defaults(in_place=False, rewrite_as_links=False, render_frontmatter=True,
                       exclude=[], render_index=False)
