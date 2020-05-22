@@ -418,7 +418,14 @@ def render_links_in_content(links, rewrite_as_links):
       link.update_aliases_in_notes()
 
 
-def run_backlinker(input_dir, output_dir, rewrite_as_links=False, render_frontmatter=True, exclusions=[], render_index=False):
+def run_backlinker(parameters):
+
+  exclusions = parameters['exclude']
+  input_dir = parameters['input']
+  output_dir = parameters['output']
+  render_frontmatter = parameters['render_frontmatter']
+  render_index = parameters['render_index']
+  rewrite_as_links = parameters['rewrite_as_links']
 
   notes_list = load_notes(input_dir)
 
